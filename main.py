@@ -24,7 +24,12 @@ with st.form('my_form'):
     gmi = st.number_input('Enter Gross Monthly Income of Borrower (e.g. 50000):', key='ni_gmi')
     emp_tenure = st.number_input('Enter Employment Tenure of Borrower in Years (e.g. 3):', key='ni_emp_tenure')
     age = st.number_input('Enter Age of Borrower in Years (e.g. 55):', key='ni_age')
-    debt_repayment = mo_amort/gmi
+    
+    if mo_amort ==0 or gmi == 0:
+        pass
+    else:
+        debt_repayment = mo_amort/gmi
+        
     no_dependents = st.number_input('Enter Number of Dependents of Borrower (e.g. 2):', key='ni_no_dependents')
     credit_score = st.number_input('Enter Borrower Credit Score (e.g. 0 for A, 1 for B, and 2 for C):', key='ni_credit_score')
 
@@ -33,53 +38,53 @@ with st.form('my_form'):
     st.write('')
 
 
-    if submitted:
+if submitted:
 
-        progress = st.progress(0)
-        my_status = 'Running calculations...'
-        st.write(my_status)
+    progress = st.progress(0)
+    my_status = 'Running calculations...'
+    st.write(my_status)
 
-        for i in range(100):
-            time.sleep(0.01)
-            progress.progress(i + 1)
+    for i in range(100):
+        time.sleep(0.01)
+        progress.progress(i + 1)
 
-        if prin==0 or int==0 or loan==0 or term==0 or mo_amort==0 or gmi==0 or age==0 or debt_repayment==0 or int > 1 or credit_score > 2:
-            st.warning('Please complete the details to compute the Loan Scoring or check the details if correct')
+    if prin==0 or int==0 or loan==0 or term==0 or mo_amort==0 or gmi==0 or age==0 or debt_repayment==0 or int > 1 or credit_score > 2:
+        st.warning('Please complete the details to compute the Loan Scoring or check the details if correct')
+    else:
+
+        df = pd.DataFrame(
+            {'principal__amount': [prin],
+             'interest_rate': [int],
+             'total_loan_amount': [loan],
+             'term_days': [term],
+             'monthly_amortization': [mo_amort],
+             'gross_monthly_income': [gmi],
+             'employment_tenure': [emp_tenure],
+             'age': [age],
+             'debt_repayment': [debt_repayment],
+             'no._of_dependents': [no_dependents],
+             'credit_score': [credit_score]
+            }
+        )
+
+        st.write('')
+        st.write('The following were the details provided:')
+        st.dataframe(df)
+
+        predict = model_dtc_lean.predict(df)
+
+        st.write('')
+        st.write('')
+        st.write('Loan Application Decision:')
+        st.write('')
+        if predict == 0:
+            st.success('The Loan Application is good. Please proceed with the booking of the loan.')
+            st.balloons()
+            st.warning('Please encode new details above if doing another loan scoring evaluation and click Get Application Rating button')
+
         else:
-
-            df = pd.DataFrame(
-                {'principal__amount': [prin],
-                 'interest_rate': [int],
-                 'total_loan_amount': [loan],
-                 'term_days': [term],
-                 'monthly_amortization': [mo_amort],
-                 'gross_monthly_income': [gmi],
-                 'employment_tenure': [emp_tenure],
-                 'age': [age],
-                 'debt_repayment': [debt_repayment],
-                 'no._of_dependents': [no_dependents],
-                 'credit_score': [credit_score]
-                }
-            )
-
-            st.write('')
-            st.write('The following were the details provided:')
-            st.dataframe(df)
-
-            predict = model_dtc_lean.predict(df)
-
-            st.write('')
-            st.write('')
-            st.write('Loan Application Decision:')
-            st.write('')
-            if predict == 0:
-                st.success('The Loan Application is good. Please proceed with the booking of the loan.')
-                st.balloons()
-                st.warning('Please encode new details above if doing another loan scoring evaluation and click Get Application Rating button')
-
-            else:
-                st.warning('Please review the Loan Application further as.')
-                st.warning('Please encode new details above if doing another loan scoring evaluation and click Get Application Rating button')
+            st.warning('Please review the Loan Application further as.')
+            st.warning('Please encode new details above if doing another loan scoring evaluation and click Get Application Rating button')
 
 
 
